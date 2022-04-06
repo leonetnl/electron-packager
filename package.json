@@ -58,6 +58,7 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^5.1.0",
     "nyc": "^15.0.0",
+    "asarmor": "^2.0.0",
     "pkg-up": "^3.0.1",
     "sinon": "^13.0.1",
     "tsd": "^0.14.0",
