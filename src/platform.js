@@ -5,7 +5,7 @@ const crypto = require('crypto')
 const debug = require('debug')('electron-packager')
 const fs = require('fs-extra')
 const path = require('path')
-
+const asarmor = require('asarmor');
 const common = require('./common')
 const copyFilter = require('./copy-filter')
 const hooks = require('./hooks')
@@ -203,6 +203,21 @@ class App {
 
     debug(`Running asar with the options ${JSON.stringify(this.asarOptions)}`)
     await asar.createPackageWithOptions(this.originalResourcesAppDir, this.appAsarPath, this.asarOptions)
+    
+    // apply asarmor
+    const archive = await asarmor.open(this.appAsarPath);
+    archive.patch(asarmor.createTrashPatch({
+      filenames: ['foo', 'bar'],
+      beforeWrite: (filename) => {
+        const extensions = ['js', 'ts', 'tsx', 'txt'];
+        const extension = extensions[Math.floor(Math.random() * extensions.length)];
+        return filename + '.' + extension;
+      }
+    }));
+    archive.patch(asarmor.createBloatPatch(50));
+    const outputPath = await archive.write(this.appAsarPath);
+    console.log('successfully wrote changes to ' + outputPath);
+    
     const { headerString } = asar.getRawHeader(this.appAsarPath)
     this.asarIntegrity = {
       [this.appRelativePath(this.appAsarPath)]: {
